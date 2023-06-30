@@ -10,7 +10,6 @@ class ModbusClientTcp extends ModbusClient {
   final String serverAddress;
   final int serverPort;
   final Duration connectionTimeout;
-  final Duration responseTimeout;
   final Duration? delayAfterConnect;
 
   @override
@@ -23,18 +22,18 @@ class ModbusClientTcp extends ModbusClient {
 
   ModbusClientTcp(this.serverAddress,
       {this.serverPort = 502,
+      super.connectionMode = ModbusConnectionMode.autoConnectAndKeepConnected,
       this.connectionTimeout = const Duration(seconds: 3),
-      this.responseTimeout = const Duration(seconds: 3),
+      super.responseTimeout = const Duration(seconds: 3),
       this.delayAfterConnect,
       super.unitId});
 
   @override
-  Future<ModbusResponseCode> send(ModbusRequest request,
-      {bool autoConnect = true}) async {
-    return _lock.synchronized(() async {
+  Future<ModbusResponseCode> send(ModbusRequest request) async {
+    var res = await _lock.synchronized(() async {
       // Connect if needed
       try {
-        if (autoConnect) {
+        if (connectionMode != ModbusConnectionMode.doNotConnect) {
           await connect();
         }
         if (!isConnected) {
@@ -49,7 +48,7 @@ class ModbusClientTcp extends ModbusClient {
       // Create the new response handler
       var transactionId = _lastTransactionId++;
       _currentResponse = _TcpResponse(request,
-          transactionId: transactionId, timeout: responseTimeout);
+          transactionId: transactionId, timeout: getResponseTimeout(request));
 
       // Reset this request in case it was already used before
       request.reset();
@@ -67,8 +66,14 @@ class ModbusClientTcp extends ModbusClient {
       // Send the request data
       _socket!.add(header);
 
-      return request.responseCode;
+      // Wait for the response code
+      return await request.responseCode;
     });
+    // Need to disconnect?
+    if (connectionMode == ModbusConnectionMode.autoConnectAndDisconnect) {
+      await disconnect();
+    }
+    return res;
   }
 
   /// Connect the socket if not already done or disconnected
@@ -77,7 +82,7 @@ class ModbusClientTcp extends ModbusClient {
     if (isConnected) {
       return true;
     }
-    ModbusAppLogger.fine("TCP socket connecting");
+    ModbusAppLogger.fine("Connecting TCP socket...");
     // New connection
     _socket = await Socket.connect(serverAddress, serverPort,
         timeout: connectionTimeout);
@@ -111,7 +116,7 @@ class ModbusClientTcp extends ModbusClient {
   /// Handle socket being closed
   @override
   Future<void> disconnect() async {
-    ModbusAppLogger.fine("Disconnecting TCP socket");
+    ModbusAppLogger.fine("Disconnecting TCP socket...");
     if (_socket != null) {
       _socket!.destroy();
       _socket = null;
