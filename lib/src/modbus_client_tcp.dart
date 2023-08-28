@@ -28,6 +28,39 @@ class ModbusClientTcp extends ModbusClient {
       this.delayAfterConnect,
       super.unitId});
 
+  /// This is an easy server address discovery.
+  ///
+  /// The discovery starts from the fourth digit of the [startIpAddress] and
+  /// only checks address of fourth digit.
+  /// Example:
+  ///   // This checks addresses from '192.168.0.10' to '192.168.0.255'
+  ///   var serverAddress = await ModbusClientTcp.discover("192.168.0.10");
+  static Future<String?> discover(String startIpAddress,
+      {int serverPort = 502,
+      Duration connectionTimeout = const Duration(milliseconds: 10)}) async {
+    var serverAddress = InternetAddress.tryParse(startIpAddress);
+    if (serverAddress == null) {
+      throw ModbusException(
+          context: "ModbusClientTcp.discover",
+          msg: "[$startIpAddress] Invalid address!");
+    }
+    for (var i = serverAddress.rawAddress[3]; i < 256; i++) {
+      var ip = serverAddress!.rawAddress;
+      ip[3] = i;
+      serverAddress = InternetAddress.fromRawAddress(ip);
+      try {
+        var socket = await Socket.connect(serverAddress, serverPort,
+            timeout: connectionTimeout);
+        socket.destroy();
+        ModbusAppLogger.finest(
+            "[${serverAddress.address}] Modbus server found!");
+        return serverAddress.address;
+      } catch (_) {}
+    }
+    ModbusAppLogger.finest("[$startIpAddress] Modbus server not found!");
+    return null;
+  }
+
   @override
   Future<ModbusResponseCode> send(ModbusRequest request) async {
     var res = await _lock.synchronized(() async {
