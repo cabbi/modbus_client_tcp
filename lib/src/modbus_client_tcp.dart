@@ -33,8 +33,10 @@ class ModbusClientTcp extends ModbusClient {
   /// The discovery starts from the fourth digit of the [startIpAddress] and
   /// only checks address of fourth digit.
   /// Example:
-  ///   // This checks addresses from '192.168.0.10' to '192.168.0.255'
-  ///   var serverAddress = await ModbusClientTcp.discover("192.168.0.10");
+  /// ```dart
+  /// // This checks addresses from '192.168.0.10' to '192.168.0.255'
+  /// var serverAddress = await ModbusClientTcp.discover("192.168.0.10");
+  /// ```
   static Future<String?> discover(String startIpAddress,
       {int serverPort = 502,
       Duration connectionTimeout = const Duration(milliseconds: 10)}) async {
@@ -77,6 +79,9 @@ class ModbusClientTcp extends ModbusClient {
             "Unexpected exception in sending TCP message", ex);
         return ModbusResponseCode.connectionFailed;
       }
+
+      // Flushes any old pending data
+      await _socket!.flush();
 
       // Create the new response handler
       var transactionId = _lastTransactionId++;
@@ -174,6 +179,11 @@ class _TcpResponse {
   }
 
   void addResponseData(Uint8List data) {
+    // Timeout expired?
+    if (_timeout.isCompleted) {
+      // No more data needed, we've already set the response code
+      return;
+    }
     _data += data;
     // Still need the TCP header?
     if (_resDataLen == null && _data.length >= 6) {
