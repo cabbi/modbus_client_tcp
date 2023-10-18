@@ -122,22 +122,28 @@ class ModbusClientTcp extends ModbusClient {
     }
     ModbusAppLogger.fine("Connecting TCP socket...");
     // New connection
-    _socket = await Socket.connect(serverAddress, serverPort,
-        timeout: connectionTimeout);
-    // listen to the received data event stream
-    _socket!.listen((Uint8List data) {
-      _onSocketData(data);
-    },
-        onError: (error) => _onSocketError(error),
-        onDone: () => disconnect(),
-        cancelOnError: true);
-
+    try {
+      _socket = await Socket.connect(serverAddress, serverPort,
+          timeout: connectionTimeout);
+      // listen to the received data event stream
+      _socket!.listen((Uint8List data) {
+        _onSocketData(data);
+      },
+          onError: (error) => _onSocketError(error),
+          onDone: () => disconnect(),
+          cancelOnError: true);
+    } catch (ex) {
+      ModbusAppLogger.warning(
+          "Connection to $serverAddress:$serverPort failed!", ex);
+      _socket = null;
+      return false;
+    }
     // Is a delay requested?
     if (delayAfterConnect != null) {
       await Future.delayed(delayAfterConnect!);
     }
-    ModbusAppLogger.fine("TCP socket${isConnected ? " " : " not "}connected");
-    return isConnected;
+    ModbusAppLogger.fine("TCP socket connected");
+    return true;
   }
 
   /// Handle received data from the socket

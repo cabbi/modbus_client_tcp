@@ -1,6 +1,6 @@
 name: modbus_client_tcp
 description: This is the Modbus Client package sending requests to a remote device via TCP/IP connection.
-version: 1.0.3
+version: 1.0.4
 repository: https://github.com/cabbi/modbus_client_tcp
 
 environment:
