@@ -1,3 +1,6 @@
+## 1.0.4+1
+- updated reference to new modbus_client 1.0.4
+- 
 ## 1.0.4
 - Fixed 'connect' method throwing exception instead of returning false
 
