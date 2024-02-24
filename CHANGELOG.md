@@ -1,6 +1,9 @@
+## 1.0.4+2
+- updated reference to new modbus_client 1.1.0 (Modbus Read & Write file records support)
+
 ## 1.0.4+1
 - updated reference to new modbus_client 1.0.4
-- 
+ 
 ## 1.0.4
 - Fixed 'connect' method throwing exception instead of returning false
 
