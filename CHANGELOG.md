@@ -1,3 +1,6 @@
+## 1.0.5
+- updated reference to new modbus_client 1.1.1 (Modbus Read & Write file records support)
+
 ## 1.0.4+2
 - updated reference to new modbus_client 1.1.0 (Modbus Read & Write file records support)
 
