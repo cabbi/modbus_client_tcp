@@ -148,7 +148,9 @@ class ModbusClientTcp extends ModbusClient {
 
   /// Handle received data from the socket
   void _onSocketData(Uint8List data) {
-    _currentResponse!.addResponseData(data);
+    // Could receive buffered data before setting up the response object
+    // (https://github.com/cabbi/modbus_client_tcp/issues/6)
+    _currentResponse?.addResponseData(data);
   }
 
   /// Handle an error from the socket
