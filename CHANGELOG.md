@@ -1,3 +1,6 @@
+## 1.2.0
+- dependency set to new modbus_client 1.2.0
+  
 ## 1.0.7
 - Fix https://github.com/cabbi/modbus_client_tcp/issues/6
 
