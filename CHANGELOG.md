@@ -1,3 +1,6 @@
+## 1.2.0+1
+- updated reference to new modbus_client 1.2.1
+
 ## 1.2.0
 - dependency set to new modbus_client 1.2.0
   
