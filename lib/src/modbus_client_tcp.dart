@@ -16,6 +16,16 @@ class ModbusClientTcp extends ModbusClient {
   bool get isConnected => _socket != null;
 
   int _lastTransactionId = 0;
+
+  int _getNextTransactionId() {
+    // UInt16 rollover handling
+    _lastTransactionId++;
+    if (_lastTransactionId > 65535) {
+      _lastTransactionId = 0;
+    }
+    return _lastTransactionId;
+  }
+
   Socket? _socket;
   final Lock _lock = Lock();
   _TcpResponse? _currentResponse;
@@ -84,7 +94,7 @@ class ModbusClientTcp extends ModbusClient {
       await _socket!.flush();
 
       // Create the new response handler
-      var transactionId = _lastTransactionId++;
+      var transactionId = _getNextTransactionId();
       _currentResponse = _TcpResponse(request,
           transactionId: transactionId, timeout: getResponseTimeout(request));
 
@@ -205,7 +215,7 @@ class _TcpResponse {
       }
       if (0 != resView.getUint16(2)) {
         ModbusAppLogger.warning(
-            "Invalid TCP transaction id", "${resView.getUint16(2) != 0}");
+            "Invalid TCP protocol id", "${resView.getUint16(2)} != 0");
         _timeout.complete();
         request.setResponseCode(ModbusResponseCode.requestRxFailed);
         return;
