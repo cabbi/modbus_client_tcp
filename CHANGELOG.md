@@ -1,3 +1,6 @@
+## 1.2.1+1
+- updated reference to new modbus_client 1.3.0 (Endianness support)
+
 ## 1.2.1
 - Fix https://github.com/cabbi/modbus_client_tcp/issues/7
 
