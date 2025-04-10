@@ -1,3 +1,6 @@
+## 1.2.2
+- BUG [Wrong response data when multiple packets are needed to construct a response](https://github.com/cabbi/modbus_client_tcp/issues/11) 
+
 ## 1.2.1+2
 - updated reference to new modbus_client 1.3.1 (64 bit integers support)
 

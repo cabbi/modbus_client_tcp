@@ -225,7 +225,7 @@ class _TcpResponse {
     // Got all data
     if (_resDataLen != null && _data.length >= _resDataLen!) {
       _timeout.complete();
-      request.setFromPduResponse(data.sublist(7));
+      request.setFromPduResponse(Uint8List.fromList(_data.sublist(7)));
     }
   }
 }
