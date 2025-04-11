@@ -1,3 +1,6 @@
+## 1.2.3
+- Added sent and received data to 'FINEST' log
+  
 ## 1.2.2
 - BUG [Wrong response data when multiple packets are needed to construct a response](https://github.com/cabbi/modbus_client_tcp/issues/11) 
 

@@ -113,6 +113,7 @@ class ModbusClientTcp extends ModbusClient {
 
       // Send the request data
       _socket!.add(header);
+      ModbusAppLogger.finest("Sent data: ${ModbusAppLogger.toHex(header)}");
 
       // Wait for the response code
       return await request.responseCode;
@@ -203,6 +204,7 @@ class _TcpResponse {
       return;
     }
     _data += data;
+    ModbusAppLogger.finest("Incoming data: ${ModbusAppLogger.toHex(data)}");
     // Still need the TCP header?
     if (_resDataLen == null && _data.length >= 6) {
       var resView = ByteData.view(Uint8List.fromList(_data).buffer, 0, 6);
